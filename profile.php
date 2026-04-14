@@ -51,7 +51,7 @@ $followingCount = $stmt->fetchColumn();
                 </div>
                 <p style="margin-top: 15px;"><?php echo htmlspecialchars($user['bio'] ?? 'No bio yet.'); ?></p>
                 <?php if ($profile_id == $_SESSION['user_id']): ?>
-                    <button class="btn" style="width: auto; margin-top: 10px;">Edit Profile</button>
+                    <a href="edit_profile.php" class="btn" style="display: inline-block; width: auto; margin-top: 10px;">Edit Profile</a>
                 <?php else: ?>
                     <?php
                     $stmt = $pdo->prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?");

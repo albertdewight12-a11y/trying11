@@ -14,9 +14,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $post = $stmt->fetch();
 
     if ($post) {
-        // Delete the photo file if it exists
-        if ($post['photo_url'] && file_exists('uploads/' . $post['photo_url'])) {
-            unlink('uploads/' . $post['photo_url']);
+        $photo_url = $post['photo_url'];
+
+        // Check if other posts are using this same photo (reposts or original)
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM posts WHERE photo_url = ? AND id != ?");
+        $stmt->execute([$photo_url, $post_id]);
+        $usage_count = $stmt->fetchColumn();
+
+        // Only delete the file if no other posts are using it
+        if ($usage_count == 0 && $photo_url && file_exists('uploads/' . $photo_url)) {
+            // Keep default profile pic and placeholder safe just in case
+            if ($photo_url != 'default_profile.png') {
+                unlink('uploads/' . $photo_url);
+            }
         }
 
         // Delete from database

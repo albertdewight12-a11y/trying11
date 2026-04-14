@@ -21,7 +21,7 @@ $posts = getAllPosts($pdo);
 
     <main>
         <?php foreach ($posts as $post): ?>
-            <div class="post">
+            <div class="post" id="post-<?php echo $post['id']; ?>">
                 <div class="post-header">
                     <img src="uploads/<?php echo $post['profile_pic']; ?>" alt="Avatar" class="user-avatar">
                     <a href="profile.php?id=<?php echo $post['user_id']; ?>" class="username"><?php echo htmlspecialchars($post['username']); ?></a>

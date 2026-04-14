@@ -24,13 +24,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $photo_url = null;
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $target_dir = "uploads/";
-        $file_extension = pathinfo($_FILES["photo"]["name"], PATHINFO_EXTENSION);
-        $file_name = uniqid() . "." . $file_extension;
-        $target_file = $target_dir . $file_name;
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $filename = $_FILES['photo']['name'];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
-            $photo_url = $file_name;
+        if (in_array($ext, $allowed)) {
+            $target_dir = "uploads/";
+            $file_name = uniqid() . "." . $ext;
+            $target_file = $target_dir . $file_name;
+
+            if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
+                $photo_url = $file_name;
+            }
+        } else {
+            $error = "Invalid file type. Only JPG, PNG, and GIF allowed.";
         }
     }
 
@@ -140,11 +147,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <script>
         document.getElementById('fetch_flight').addEventListener('click', function() {
+            const btn = this;
             const flight = document.getElementById('flight_number').value.trim().toUpperCase();
             if (!flight) {
                 alert('Please enter a flight number or callsign (e.g. DAL123).');
                 return;
             }
+
+            btn.disabled = true;
+            btn.textContent = 'Searching...';
 
             // OpenSky /states/all can take a 'callsign' filter
             // Note: The public API often requires callsigns to be exactly 8 characters (padded with spaces)
@@ -177,6 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 .catch(err => {
                     console.error(err);
                     alert('Error connecting to OpenSky API.');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Fetch Info';
                 });
         });
     </script>
