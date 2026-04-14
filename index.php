@@ -25,6 +25,13 @@ $posts = getAllPosts($pdo);
                 <div class="post-header">
                     <img src="uploads/<?php echo $post['profile_pic']; ?>" alt="Avatar" class="user-avatar">
                     <a href="profile.php?id=<?php echo $post['user_id']; ?>" class="username"><?php echo htmlspecialchars($post['username']); ?></a>
+
+                    <?php if ($post['user_id'] == $current_user_id): ?>
+                        <form action="delete_post.php" method="POST" style="margin-left: auto;" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                            <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+                            <button type="submit" style="background:none; border:none; color: #ed4956; cursor:pointer; font-size: 0.8rem;">Delete</button>
+                        </form>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($post['photo_url']): ?>
