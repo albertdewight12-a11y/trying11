@@ -15,7 +15,9 @@ requireLogin();
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         #map { height: calc(100vh - 120px); width: 100%; }
-        .airplane-icon { transform: rotate(0deg); }
+        .airplane-marker {
+            transition: transform 0.5s linear;
+        }
     </style>
 </head>
 <body>
@@ -38,6 +40,14 @@ requireLogin();
 
         var markers = {};
 
+        // Simple airplane emoji as icon
+        var airplaneIcon = L.divIcon({
+            className: 'airplane-marker',
+            html: '<div style="font-size: 24px; transform: rotate(45deg);">✈️</div>',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+
         function fetchPlanes() {
             // Get bounds of current map view to limit API request
             var bounds = map.getBounds();
@@ -46,7 +56,7 @@ requireLogin();
             var lamax = bounds.getNorth();
             var lomax = bounds.getEast();
 
-            fetch(`https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`)
+            fetch(`proxy.php?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.states) {
@@ -60,11 +70,21 @@ requireLogin();
                             if (lat && lon) {
                                 if (markers[icao]) {
                                     markers[icao].setLatLng([lat, lon]);
+                                    if (track) {
+                                        markers[icao].getElement().style.transform += ` rotate(${track}deg)`;
+                                    }
                                 } else {
                                     markers[icao] = L.marker([lat, lon], {
-                                        title: callsign
+                                        title: callsign,
+                                        icon: airplaneIcon
                                     }).addTo(map)
-                                    .bindPopup(`<b>Flight: ${callsign}</b><br>ICAO: ${icao}<br>Heading: ${track}°`);
+                                    .bindPopup(`<b>Flight: ${callsign}</b><br>ICAO: ${icao}<br>Heading: ${track ? track + '°' : 'N/A'}`);
+
+                                    if (track) {
+                                        markers[icao].on('add', function() {
+                                            this.getElement().style.transform += ` rotate(${track}deg)`;
+                                        });
+                                    }
                                 }
                             }
                         });

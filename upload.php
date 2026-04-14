@@ -13,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $caption = $_POST['caption'];
     $flight_number = $_POST['flight_number'];
     $tail_number = $_POST['tail_number'];
-    $aircraft_type_id = $_POST['aircraft_type_id'];
-    $airline_id = $_POST['airline_id'];
+    $aircraft_type_id = !empty($_POST['aircraft_type_id']) ? $_POST['aircraft_type_id'] : null;
+    $airline_id = !empty($_POST['airline_id']) ? $_POST['airline_id'] : null;
     $location = $_POST['location'];
     $arrival = $_POST['arrival'];
     $destination = $_POST['destination'];
@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Note: The public OpenSky API is very limited. Fetching /states/all is heavy.
             // Ideally, we'd use a more specific API if available.
-            fetch(`https://opensky-network.org/api/states/all`)
+            fetch(`proxy.php`)
                 .then(response => {
                     if (!response.ok) throw new Error('API limit reached or error');
                     return response.json();
